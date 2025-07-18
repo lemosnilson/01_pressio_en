@@ -1,0 +1,105 @@
+# run_analysis.py
+
+import os
+import django
+import csv
+import numpy as np
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
+django.setup()
+
+from analysis_processor import processar_analise_para_relatorio
+
+# --- DADOS DE ENTRADA ---
+DADOS_FIXOS = {
+    'c': '0.6', 'p_tf': '100', 'l_real': '4.216',
+    'b': '2.372', 'd': '0.3',
+}
+RESISTENCIAS_SOLO_KGF = [round(x, 1) for x in np.arange(0.4, 5.01, 0.2)]
+CLASSES_DE_MADEIRA = [
+    {'nome': 'C14', 'fb': '14', 'fv': '3.0', 'e_gpa': '7', 'densidade': '290'},
+    {'nome': 'C16', 'fb': '16', 'fv': '3.2', 'e_gpa': '8', 'densidade': '310'},
+    {'nome': 'C18', 'fb': '18', 'fv': '3.4', 'e_gpa': '9', 'densidade': '320'},
+    {'nome': 'C20', 'fb': '20', 'fv': '3.6', 'e_gpa': '9.5', 'densidade': '330'},
+    {'nome': 'C22', 'fb': '22', 'fv': '3.8', 'e_gpa': '10', 'densidade': '340'},
+    {'nome': 'C24', 'fb': '24', 'fv': '4.0', 'e_gpa': '11', 'densidade': '350'},
+    {'nome': 'C27', 'fb': '27', 'fv': '4.0', 'e_gpa': '12', 'densidade': '370'},
+    {'nome': 'C30', 'fb': '30', 'fv': '4.0', 'e_gpa': '12', 'densidade': '380'},
+    {'nome': 'C35', 'fb': '35', 'fv': '4.0', 'e_gpa': '13', 'densidade': '400'},
+    {'nome': 'C40', 'fb': '40', 'fv': '4.0', 'e_gpa': '14', 'densidade': '420'},
+    {'nome': 'C45', 'fb': '45', 'fv': '4.0', 'e_gpa': '15', 'densidade': '440'},
+    {'nome': 'C50', 'fb': '50', 'fv': '4.0', 'e_gpa': '16', 'densidade': '460'},
+    {'nome': 'D18', 'fb': '18', 'fv': '3.4', 'e_gpa': '9.5', 'densidade': '475'},
+    {'nome': 'D24', 'fb': '24', 'fv': '4.0', 'e_gpa': '10', 'densidade': '485'},
+    {'nome': 'D30', 'fb': '30', 'fv': '4.0', 'e_gpa': '11', 'densidade': '530'},
+    {'nome': 'D35', 'fb': '35', 'fv': '4.0', 'e_gpa': '12', 'densidade': '540'},
+    {'nome': 'D40', 'fb': '40', 'fv': '4.0', 'e_gpa': '13', 'densidade': '560'},
+    {'nome': 'D50', 'fb': '50', 'fv': '4.0', 'e_gpa': '14', 'densidade': '620'},
+    {'nome': 'D60', 'fb': '60', 'fv': '4.5', 'e_gpa': '17', 'densidade': '700'},
+    {'nome': 'D70', 'fb': '70', 'fv': '5.0', 'e_gpa': '20', 'densidade': '900'},
+    {'nome': 'Pinus (Classe 1)', 'fb': '35', 'fv': '6.0', 'e_gpa': '11.0', 'densidade': '500'},
+    {'nome': 'Pinus (Classe 2)', 'fb': '27', 'fv': '3.5', 'e_gpa': '8.0', 'densidade': '400'},
+    {'nome': 'Pinus (Classe 3)', 'fb': '14', 'fv': '2.5', 'e_gpa': '5.0', 'densidade': '350'},
+    {'nome': 'Eucalyptus (Classe 1)', 'fb': '50', 'fv': '4', 'e_gpa': '14.0', 'densidade': '700'},
+    {'nome': 'Eucalyptus (Classe 2)', 'fb': '40', 'fv': '4', 'e_gpa': '13.0', 'densidade': '600'},
+    {'nome': 'Eucalyptus (Classe 3)', 'fb': '30', 'fv': '4', 'e_gpa': '11.0', 'densidade': '500'},
+]
+
+def executar_simulacoes():
+    print("Iniciando análise de sensibilidade...")
+    
+    resultados_finais = []
+    total_simulacoes = len(CLASSES_DE_MADEIRA) * len(RESISTENCIAS_SOLO_KGF)
+    simulacao_atual = 0
+    sucessos = 0
+
+    for madeira in CLASSES_DE_MADEIRA:
+        for resistencia in RESISTENCIAS_SOLO_KGF:
+            simulacao_atual += 1
+            print(f"  Simulação {simulacao_atual}/{total_simulacoes}: Madeira='{madeira['nome']}', Solo='{resistencia} kgf/cm²'")
+
+            dados_entrada = {**DADOS_FIXOS, 'qa': str(resistencia), **madeira}
+            resultado_processado = processar_analise_para_relatorio(dados_entrada)
+
+            if resultado_processado.get('sucesso'):
+                sucessos += 1
+                print(f"  Sucesso {sucessos}/{total_simulacoes}: Madeira='{madeira['nome']}', Solo='{resistencia} kgf/cm²' -> Leff={resultado_processado['leff_final']}m")
+                
+                linha_de_resultado = {
+                    'Madeira': madeira['nome'],
+                    'Resistencia_Solo_kgf/cm2': resistencia,
+                    # INÍCIO DA ALTERAÇÃO SOLICITADA
+                    'Fb_MPa': madeira['fb'],
+                    'Fv_MPa': madeira['fv'],
+                    'E_GPa': madeira['e_gpa'],
+                    'Densidade_kg/m3': madeira['densidade'],
+                    # FIM DA ALTERAÇÃO SOLICITADA
+                    'Leff_Final_m': resultado_processado['leff_final'],
+                    'Leff_Flexao_m': resultado_processado['leff_flexao'],
+                    'Leff_Cisalhamento_m': resultado_processado['leff_cisalhamento'],
+                    'Leff_Deformacao_m': resultado_processado['leff_deformacao'],
+                    'Comprimento_Ativo_%': resultado_processado['perc_comprimento_ativo'],
+                    'Capacidade_Solo_Utilizada_%': resultado_processado['perc_capacidade_solo'],
+                    'Pressao_Area_Total_kgf/cm2': resultado_processado['pressao_total_kgf'],
+                    'Pressao_Dispersao_45_kgf/cm2': resultado_processado['pressao_dispersa_kgf'],
+                }
+                resultados_finais.append(linha_de_resultado)
+            else:
+                print(f"    ERRO na simulação: {resultado_processado.get('erro')}")
+
+    if resultados_finais:
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        nome_arquivo = os.path.join(script_dir, 'resultados_analise_sensibilidade.csv')
+        cabecalhos = resultados_finais[0].keys()
+        
+        with open(nome_arquivo, 'w', newline='', encoding='utf-8') as f:
+            writer = csv.DictWriter(f, fieldnames=cabecalhos, delimiter=';')
+            writer.writeheader()
+            writer.writerows(resultados_finais)
+        
+        print(f"\nAnálise concluída! {sucessos} simulações salvas em '{nome_arquivo}'.")
+    else:
+        print("\nNenhuma simulação foi concluída com sucesso.")
+
+if __name__ == '__main__':
+    executar_simulacoes()
