@@ -1,0 +1,148 @@
+{# templates/pages/insercao_props.html #}
+{% extends "layouts/base-auth.html" %}
+{% load static %}
+
+{% block extrastyle %}
+<style>
+  /* Estrutura para o 'Sticky Footer' */
+  body.dark-version.dark-page {
+    background-color: #131516 !important;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  .main-content {
+    flex: 1; /* Força o conteúdo principal a 'crescer' */
+  }
+
+  /* Container principal da página */
+  .full-vh {
+    display: flex;
+    justify-content: center;
+    padding-top: 5rem;
+  }
+  .main-container {
+    display: flex;
+    gap: 2rem;
+    width: 100%;
+    max-width: 1200px;
+    padding: 2rem;
+  }
+  .form-column, .image-column {
+    flex: 1 1 50%;
+    display: flex;
+  }
+  .insercao-card {
+    background-color: #212325;
+    color: #ffffff;
+    border: none;
+    border-radius: .75rem;
+    padding: 2rem;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  .card-content-wrapper {
+    width: 100%;
+  }
+
+  /* Estilos do Formulário */
+  .form-group {
+    margin-bottom: 1rem;
+    text-align: left;
+  }
+  .form-control {
+    background-color: #343a40;
+    border: 1px solid #495057;
+    color: #fff;
+  }
+  .form-control:focus {
+    background-color: #343a40;
+    border-color: #80bdff;
+    color: #fff;
+  }
+  label {
+    font-size: 1.1rem;
+    font-weight: 300;
+  }
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type=number] {
+    -moz-appearance: textfield;
+  }
+
+  /* Responsividade */
+  @media (max-width: 768px) {
+    .main-container {
+      flex-direction: column;
+      align-items: center;
+    }
+    .form-column, .image-column {
+      max-width: 500px;
+      width: 100%;
+    }
+  }
+</style>
+{% endblock extrastyle %}
+
+{% block content %}
+<main class="main-content">
+  <div class="full-vh">
+    <div class="main-container">
+
+      <!-- Formulário de Propriedades Mecânicas -->
+      <div class="form-column">
+        <div class="insercao-card">
+          <div class="card-content-wrapper">
+            <h4 class="text-center mb-4">Mat Mechanical Properties</h4>
+            <form action="{% url 'insercao_props' %}" method="POST">
+              {% csrf_token %}
+              <div class="form-group">
+                <label for="densidade">ρ - Density [lb/ft³]</label>
+                <input type="number" step="any" class="form-control"
+                       id="densidade" name="densidade" required>
+              </div>
+              <div class="form-group">
+                <label for="fb">Fb - Bending Strength [psi]</label>
+                <input type="number" step="any" class="form-control"
+                       id="fb" name="fb" required>
+              </div>
+              <div class="form-group">
+                <label for="fv">Fv - Shear Strength [psi]</label>
+                <input type="number" step="any" class="form-control"
+                       id="fv" name="fv" required>
+              </div>
+              <div class="form-group">
+                <label for="e">E - Young's Modulus [ksi]</label>
+                <input type="number" step="any" class="form-control"
+                        id="e" name="e_gpa" required>
+              </div>
+              <div class="text-center mt-4">
+                <button type="submit" class="btn bg-gradient-info w-100">Next</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Imagem do MATS -->
+      <div class="image-column">
+        <div class="insercao-card">
+          <div class="card-content-wrapper text-center">
+            <img src="{% static 'assets/img/mats_properties.png' %}"
+                 alt="Diagrama do MATS"
+                 style="max-width:100%; height:auto; border-radius:.5rem;">
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+{% endblock content %}

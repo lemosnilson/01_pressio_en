@@ -2,74 +2,36 @@
 {% load static %}
 
 {% block extrastyle %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 <style>
-    .card-result {
-        background-color: #202940;
-        border: 1px solid #343a40;
-        transition: all 0.3s ease-in-out;
-        position: relative;
-    }
-    .card-header {
-        background-color: transparent;
-        border-bottom: 1px solid #343a40;
-    }
-    /* Removendo a regra de altura do main-content que não é mais necessária aqui */
-    .result-value {
-        font-size: 1.5rem;
-        font-weight: 500;
-    }
-    .card-highlight {
-        border: 2px solid #0dcaf0;
-        box-shadow: 0 0.5rem 1.5rem rgba(13, 202, 240, 0.25);
-        transform: scale(1.03);
-    }
-    .governing-badge {
-        position: absolute;
-        top: 0;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        padding: 0.5em 1em;
-        font-size: 0.9rem;
-    }
-    .summary-percent-value {
-        font-size: 2rem;
-        font-weight: 600;
-    }
-    .alert-custom {
-        background-color: #27293d;
-        border: 1px solid #4a4a5f;
-    }
-    .motivo-reprovacao {
-        color: #f8f9fa;
-        font-size: 1rem;
-        font-weight: 500;
-    }
-    .status-badge {
-        display: inline-block;
-        padding: 0.4rem 1.5rem;
-        border-radius: 0.375rem;
-        color: #fff;
-        font-size: 1.5rem;
-    }
-    .status-badge-aprovado {
-        background-color: #198754;
-    }
-    .status-badge-reprovado {
-        background-color: #dc3545;
+    /* Seus estilos CSS permanecem os mesmos */
+    .card-result { background-color: #202940; border: 1px solid #343a40; transition: all 0.3s ease-in-out; position: relative; }
+    .card-header { background-color: transparent; border-bottom: 1px solid #343a40; }
+    .result-value { font-size: 1.5rem; font-weight: 500; }
+    .card-highlight { border: 2px solid #0dcaf0; box-shadow: 0 0.5rem 1.5rem rgba(13, 202, 240, 0.25); transform: scale(1.03); }
+    .governing-badge { position: absolute; top: 0; left: 50%; transform: translate(-50%, -50%); padding: 0.5em 1em; font-size: 0.9rem; }
+    .summary-percent-value { font-size: 2rem; font-weight: 600; }
+    .alert-custom { background-color: #27293d; border: 1px solid #4a4a5f; }
+    .failure-reason { color: #f8f9fa; font-size: 1rem; font-weight: 500; }
+    .status-badge { display: inline-block; padding: 0.4rem 1.5rem; border-radius: 0.375rem; color: #fff; font-size: 2.5rem; }
+    .status-badge-aprovado { background-color: #198754; }
+    .status-badge-reprovado { background-color: #dc3545; }
+    .card-result .card-header h6 {
+        font-size: 1.5rem; /* Aumenta o tamanho padrão (geralmente 1rem) em 50% */
+        font-weight: 600;  /* Opcional: Deixa a fonte um pouco mais forte */
     }
 </style>
 {% endblock extrastyle %}
 
 
 {% block content %}
-
-{% comment %} A tag <main> foi removida daqui. O conteúdo agora é injetado diretamente na <main> do template base. {% endcomment %}
 <div class="container-fluid py-4">
     
     <div class="row">
         <div class="col-12 text-center">
-            <h4 class="mb-0 text-white">RESULTADOS</h4>
-            <p class="text-white-50">Comprimentos efetivos de cada classe de carregamento</p>
+            <h4 class="mb-0 text-white">RESULTS</h4>
+            <p class="text-white-50">Effective length for each load case</p>
         </div>
     </div>
     <div class="row mt-4">
@@ -78,31 +40,31 @@
             <div class="card h-100 card-result text-white {% if analise.is_governing %}card-highlight{% endif %}">
 
                 {% if analise.is_governing %}
-                    <span class="badge bg-info governing-badge">Estado Limite</span>
+                    <span class="badge bg-info governing-badge">Governing Limit</span>
                 {% endif %}
 
                 <div class="card-header text-center pb-3 pt-5">
                     <h6 class="mb-0">{{ analise.titulo }}</h6>
                     
                     <p class="text-sm text-white-50 px-2 mb-0 mt-2">
-                        {% if analise.titulo == 'Limite de Flexão' %}
-                            O maior comprimento que o mats suporta a tensão de flexão aplicada.
-                        {% elif analise.titulo == 'Limite de Cisalhamento' %}
-                            O maior comprimento que o mats suporta a tensão de cisalhamento aplicada.
-                        {% elif analise.titulo == 'Limite de Deformação' %}
-                            O maior comprimento que o mats suporta a deformação resultante.
+                        {% if analise.titulo == 'Bending Limit' %}
+                            The maximum length the mat can span under the applied bending stress.
+                        {% elif analise.titulo == 'Shear Limit' %}
+                            The maximum length the mat can span under the applied shear stress.
+                        {% elif analise.titulo == 'Deflection Limit' %}
+                            The maximum length the mat can span based on the resulting deflection.
                         {% endif %}
                     </p>
                 </div>
                 <div class="card-body text-center">
-                    <p class="text-sm text-white-50 mb-1">Comprimento Efetivo (Leff)</p>
+                    <p class="text-sm text-white-50 mb-1">Effective Length (Leff)</p>
                     <p class="text-info result-value">{{ analise.leff }}</p>
                     <hr class="horizontal light my-3">
-                    <p class="text-sm text-white-50 mb-1">Pressão Média Gerada</p>
+                    <p class="text-sm text-white-50 mb-1">Average Ground Pressure</p>
                     <p class="text-info result-value">{{ analise.pressao_gerada }}</p>
                     <hr class="horizontal light my-3">
-                    <p class="text-sm text-white-50 mb-1">Deformação na extremidade</p>
-                    <p class="text-info result-value">{{ analise.deformacao_mm }}</p>
+                    <p class="text-sm text-white-50 mb-1">Edge Deflection</p>
+                    <p class="text-info result-value">{{ analise.deformacao }}</p>
                 </div>
             </div>
         </div>
@@ -115,49 +77,49 @@
         <div class="col-lg-8">
             <div class="card card-result">
                 <div class="card-header text-center">
-                    <h5 class="mb-0 text-white">Resumo da Análise e Segurança</h5>
+                    <h5 class="mb-0 text-white">Analysis & Safety Summary</h5>
                     
-                    {% if resultados.resumo_comparativo.status_geral == "APROVADO" %}
-                        <h3 class="status-badge status-badge-aprovado fw-bold mt-2 mb-3">APROVADO</h3>
+                    {% if resultados.resumo_comparativo.status_geral == "APPROVED" %}
+                        <h3 class="status-badge status-badge-aprovado fw-bold mt-2 mb-3">APPROVED</h3>
                     {% else %}
-                        <h3 class="status-badge status-badge-reprovado fw-bold mt-2 mb-3">REPROVADO</h3>
+                        <h3 class="status-badge status-badge-reprovado fw-bold mt-2 mb-3">FAIL</h3>
+                    {% endif %}
                         
-                        {% if resultados.resumo_comparativo.falha_por_comprimento %}
-                        <p class="motivo-reprovacao mt-n2 mb-2">
-                            O comprimento efetivo mínimo necessário é <strong>{{ resultados.resumo_comparativo.excesso_comprimento_perc }}%</strong> maior que o comprimento dos mats.
-                        </p>
-                        {% endif %}
+                    {% if resultados.resumo_comparativo.falha_por == "length" %}
+                    <p class="failure-reason mt-n2 mb-2">
+                        The required effective length is greater than the actual mat length.
+                    </p>
+                    {% endif %}
 
-                        {% if resultados.resumo_comparativo.falha_por_solo %}
-                        <p class="motivo-reprovacao mt-n2 mb-2">
-                            A carga aplicada no solo é <strong>{{ resultados.resumo_comparativo.excesso_solo_perc }}%</strong> maior que a sua tensão admissível.
-                        </p>
-                        {% endif %}
+                    {% if resultados.resumo_comparativo.falha_por == "soil" %}
+                    <p class="failure-reason mt-n2 mb-2">
+                        The applied ground pressure is greater than the allowable soil capacity.
+                    </p>
                     {% endif %}
 
                 </div>
                 <div class="card-body text-white">
                     <div class="row text-center mb-4">
                         <div class="col-md-6">
-                            <h6>Comprimento Ativo dos Mats</h6>
+                            <h6>Active Mat Length Utilization</h6>
                             <p class="summary-percent-value {% if resultados.resumo_comparativo.perc_comprimento_ativo_raw > 100 %}text-danger{% else %}text-info{% endif %}">
                                 {{ resultados.resumo_comparativo.perc_comprimento_ativo }}%
                             </p>
                         </div>
                         <div class="col-md-6">
-                            <h6>Capacidade do Solo Utilizada</h6>
+                            <h6>Soil Capacity Utilization</h6>
                             <p class="summary-percent-value {% if resultados.resumo_comparativo.perc_capacidade_solo_raw > 100 %}text-danger{% else %}text-info{% endif %}">
                                 {{ resultados.resumo_comparativo.perc_capacidade_solo }}%
                             </p>
                         </div>
                     </div>
 
-                    {% if resultados.resumo_comparativo.status_geral == "APROVADO" %}
+                    {% if resultados.resumo_comparativo.status_geral == "APPROVED" %}
                         <div class="alert alert-custom" role="alert">
-                            <strong>Atenção:</strong> Se fosse usada a pressão média sobre a área total dos mats (6,10 m), o valor seria de apenas <strong>{{ resultados.resumo_comparativo.pressao_total_kgf }} kgf/cm²</strong>. Usar este valor subdimensionado poderia causar um acidente.
+                            <strong>Note on Underestimation:</strong> Using an average pressure over the mat's total area would result in an underestimated value of only <strong>{{ resultados.resumo_comparativo.pressao_total_psf }} psf</strong>. Relying on this undersized value could lead to an accident.
                         </div>
                         <div class="alert alert-custom" role="alert">
-                            <strong>Comparativo:</strong> Se fosse usada uma simples dispersão a 45°, a pressão calculada seria de <strong>{{ resultados.resumo_comparativo.pressao_dispersa_kgf }} kgf/cm²</strong>, indicando que recursos seriam gastos desnecessariamente em um projeto superdimensionado.
+                            <strong>Note on Overestimation:</strong> Using a simple 45° dispersion method would result in a calculated pressure of <strong>{{ resultados.resumo_comparativo.pressao_dispersa_psf }} psf</strong>, potentially leading to an oversized and uneconomical design.
                         </div>
                     {% endif %}
 
@@ -165,7 +127,18 @@
             </div>
         </div>
     </div>
-</div>
-{% comment %} Fim do container-fluid que estava dentro da main {% endcomment %}
 
+    <div class="row mt-5">
+        <div class="col-12 d-flex justify-content-center">
+            <a href="{% url 'insercao' %}" class="btn bg-gradient-info mx-2">
+                <i class="fas fa-redo-alt me-2"></i> Start Over
+            </a>
+            
+            <a href="{% url 'logout' %}" class="btn btn-outline-light mx-2">
+                <i class="fas fa-sign-out-alt me-2"></i> Exit
+            </a>
+        </div>
+    </div>
+
+</div>
 {% endblock content %}

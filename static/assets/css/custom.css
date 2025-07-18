@@ -1,0 +1,9 @@
+/* Estilos Globais Customizados para o Projeto PRESSIO */
+
+.navbar-nav .nav-link {
+    font-size: 0.9em !important;
+}
+/* Ajusta o tamanho da fonte dos botões */
+.btn {
+    font-size: 1.2rem; /* O padrão costuma ser um pouco menor, como 0.875rem. Ajuste este valor como desejar. */
+}

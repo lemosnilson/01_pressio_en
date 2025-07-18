@@ -5,7 +5,7 @@ import math
 Script para análise de bases de grua (Crane Mats) usando 3 MÉTODOS
 baseado no paper "Effective Bearing Length of Crane Mats" de David Duerr.
 
-Versão com variáveis alinhadas à interface do app PRESSIO.
+Versão aprimorada com indicadores de percentual de carregamento e fator de segurança.
 """
 
 
@@ -23,7 +23,7 @@ def obter_entrada_numerica(prompt):
 # --- MÉTODO 1: BASEADO NA CAPACIDADE DO SOLO ---
 def calcular_metodo_capacidade_solo(p_newtons, w_newtons, qa_pascals, B, H, Fb_pascals, Fv_pascals, modulo_de_seccao):
     print("\n--- MÉTODO 1: Análise baseada na Capacidade do Solo ---")
-    print("Objetivo: Dimensionar a base para que o solo não falhe, e verificar as tensões na base.")
+    print("Objetivo: Dimensionar o mats para a capacidade do solo e verificar suas tensões.")
 
     a_reqd = (p_newtons + w_newtons) / qa_pascals
     l_reqd = a_reqd / B if B > 0 else 0
@@ -34,20 +34,27 @@ def calcular_metodo_capacidade_solo(p_newtons, w_newtons, qa_pascals, B, H, Fb_p
     v = (q_p * B) * (lc - H) if lc > H else 0
     f_v_calc = (1.5 * v) / (B * H) if (B * H) > 0 else 0
 
+    # NOVOS CÁLCULOS DE PERCENTUAL
+    fb_percent = (f_b_calc / Fb_pascals) * 100 if Fb_pascals > 0 else 0
+    fv_percent = (f_v_calc / Fv_pascals) * 100 if Fv_pascals > 0 else 0
+
     print(f"Comprimento de apoio necessário (L_reqd): {l_reqd:.2f} m")
-    print(f"Tensão de flexão resultante (fb): {f_b_calc / 1e6:.2f} MPa (Admissível: {Fb_pascals / 1e6:.2f} MPa)")
-    print(f"Tensão de cisalhamento resultante (fv): {f_v_calc / 1e6:.2f} MPa (Admissível: {Fv_pascals / 1e6:.2f} MPa)")
-    if f_b_calc <= Fb_pascals and f_v_calc <= Fv_pascals:
-        print("Resultado: A base RESISTE às tensões para este comprimento.")
+    print(f"Tensão de flexão resultante: {fb_percent:.1f}% da capacidade do mats.")
+    print(f"Tensão de cisalhamento resultante: {fv_percent:.1f}% da capacidade do mats.")
+
+    if fb_percent <= 100 and fv_percent <= 100:
+        print("Resultado: ✅ O mats RESISTE às tensões.")
     else:
-        print("Resultado: A base NÃO RESISTE às tensões para este comprimento.")
+        print("Resultado: ❌ O mats NÃO RESISTE às tensões.")
+
+    return l_reqd
 
 
-# --- MÉTODO 2: BASEADO NA RESISTÊNCIA DA BASE (VERSÃO COMPLETA) ---
+# --- MÉTODO 2: BASEADO NA RESISTÊNCIA DO MATS ---
 def calcular_metodo_resistencia_base(p_newtons, w_newtons, qa_pascals, B, C, H, Fb_pascals, Fv_pascals,
                                      modulo_de_seccao):
-    print("\n--- MÉTODO 2: Análise baseada na Resistência da Base (Flexão e Cisalhamento) ---")
-    print("Objetivo: Encontrar o Leff limitante da base e verificar se o solo suporta.")
+    print("\n--- MÉTODO 2: Análise baseada na Resistência dos Mats ---")
+    print("Objetivo: Encontrar o Leff limitante do mats e verificar se o solo suporta.")
 
     m_max = Fb_pascals * modulo_de_seccao
     a_flex = p_newtons
@@ -55,7 +62,7 @@ def calcular_metodo_resistencia_base(p_newtons, w_newtons, qa_pascals, B, C, H, 
     c_flex = p_newtons * C ** 2
     discriminante_flex = b_flex ** 2 - 4 * a_flex * c_flex
     leff_flexao = float('inf')
-    if discriminante_flex >= 0:
+    if discriminante_flex >= 0 and a_flex != 0:
         leff_flexao = (-b_flex + math.sqrt(discriminante_flex)) / (2 * a_flex)
 
     vn_max = (Fv_pascals * B * H) / 1.5
@@ -66,24 +73,27 @@ def calcular_metodo_resistencia_base(p_newtons, w_newtons, qa_pascals, B, C, H, 
     leff = min(leff_flexao, leff_cisalhamento)
     modo_de_falha = "Flexão" if leff == leff_flexao else "Cisalhamento"
 
-    print(f"Leff limitado pela Flexão: {leff_flexao:.2f} m")
-    print(f"Leff limitado pelo Cisalhamento: {leff_cisalhamento:.2f} m")
-    print(f"Modo de falha governante da base: {modo_de_falha} em Leff = {leff:.2f} m")
-
     q_t = (p_newtons + w_newtons) / (leff * B) if leff * B > 0 else 0
-    print(f"Pressão resultante no solo (qt): {q_t / 1e6:.4f} MPa (Admissível: {qa_pascals / 1e6:.4f} MPa)")
 
-    if q_t <= qa_pascals:
-        print("Resultado: O solo RESISTE à pressão para esta configuração.")
+    # NOVO CÁLCULO DE PERCENTUAL
+    qt_percent = (q_t / qa_pascals) * 100 if qa_pascals > 0 else 0
+
+    print(f"Modo de falha governante do mats: {modo_de_falha} em Leff = {leff:.2f} m")
+    print(f"Pressão resultante no solo: {qt_percent:.1f}% da capacidade do solo.")
+
+    if qt_percent <= 100:
+        print("Resultado: ✅ O solo RESISTE à pressão.")
     else:
-        print("Resultado: O solo NÃO RESISTE à pressão para esta configuração.")
+        print("Resultado: ❌ O solo NÃO RESISTE à pressão.")
+
+    return leff
 
 
-# --- MÉTODO 3: CÁLCULO DO LEFF EFETIVO (PROPOSTA DO AUTOR) ---
+# --- MÉTODO 3: CÁLCULO DO LEFF MÁXIMO (CAPACIDADE DO SISTEMA) ---
 def calcular_metodo_leff_efetivo(qa_pascals, w_newtons, L, B, H, C, Fb_pascals, Fv_pascals, E_pascals,
                                  modulo_de_seccao, momento_de_inercia):
-    print("\n--- MÉTODO 3: Cálculo do Leff Efetivo (Proposta do Autor) ---")
-    print("Objetivo: Encontrar o comprimento de apoio efetivo máximo, considerando todos os limites.")
+    print("\n--- MÉTODO 3: Cálculo do Leff Máximo (Capacidade do Sistema) ---")
+    print("Objetivo: Encontrar o comprimento de apoio máximo que o sistema suporta.")
 
     mn = Fb_pascals * modulo_de_seccao
     vn = (Fv_pascals * B * H) / 1.5
@@ -93,7 +103,7 @@ def calcular_metodo_leff_efetivo(qa_pascals, w_newtons, L, B, H, C, Fb_pascals, 
     c_flexao = (qa_pascals * B * C ** 2) + (2 * C * w_newtons) - (8 * mn)
     discriminante_flexao = b_flexao ** 2 - 4 * a_flexao * c_flexao
     leff_flexao = float('inf')
-    if discriminante_flexao >= 0:
+    if discriminante_flexao >= 0 and a_flexao != 0:
         leff_flexao = (-b_flexao + math.sqrt(discriminante_flexao)) / (2 * a_flexao)
 
     a_cisalhamento = qa_pascals * B
@@ -101,21 +111,19 @@ def calcular_metodo_leff_efetivo(qa_pascals, w_newtons, L, B, H, C, Fb_pascals, 
     c_cisalhamento = (w_newtons * C) + (2 * w_newtons * H)
     discriminante_cisalhamento = b_cisalhamento ** 2 - 4 * a_cisalhamento * c_cisalhamento
     leff_cisalhamento = float('inf')
-    if discriminante_cisalhamento >= 0:
+    if discriminante_cisalhamento >= 0 and a_cisalhamento != 0:
         leff_cisalhamento = (-b_cisalhamento + math.sqrt(discriminante_cisalhamento)) / (2 * a_cisalhamento)
 
-    termo_interno = (0.06 * E_pascals * momento_de_inercia) / (0.9 * qa_pascals * B)
+    termo_interno = (0.06 * E_pascals * momento_de_inercia) / (0.9 * qa_pascals * B) if (
+                                                                                                    0.9 * qa_pascals * B) > 0 else 0
     lc_deflexao = termo_interno ** (1 / 3.0)
     leff_deflexao = (2 * lc_deflexao) + C
 
     leff_final = min(leff_flexao, leff_cisalhamento, leff_deflexao, L)
 
-    print(f"Leff baseado na Flexão: {leff_flexao:.4f} m")
-    print(f"Leff baseado no Cisalhamento: {leff_cisalhamento:.4f} m")
-    print(f"Leff baseado na Deflexão: {leff_deflexao:.4f} m")
-    print(f"Comprimento real da base (L): {L:.4f} m")
-    print("-" * 40)
-    print(f"O Comprimento de Apoio Efetivo (Leff) final é: {leff_final:.4f} m")
+    print(f"O Comprimento de Apoio Efetivo Máximo (Leff) que o sistema suporta é: {leff_final:.2f} m")
+
+    return leff_final
 
 
 # --- FUNÇÃO PRINCIPAL ---
@@ -148,15 +156,36 @@ def main():
     E_pascals = E_gpa * 1e9
 
     print("\n--- A calcular... ---")
-    print(f"(Nota: Peso próprio da base calculado em {w_newtons / 9810:.2f} tf)")
 
     modulo_de_seccao = (B * H ** 2) / 6
     momento_de_inercia = (B * H ** 3) / 12
 
     # --- Execução das Análises ---
-    calcular_metodo_capacidade_solo(p_newtons, w_newtons, qa_pascals, B, H, Fb_pascals, Fv_pascals, modulo_de_seccao)
-    calcular_metodo_resistencia_base(p_newtons, w_newtons, qa_pascals, B, C, H, Fb_pascals, Fv_pascals, modulo_de_seccao)
-    calcular_metodo_leff_efetivo(qa_pascals, w_newtons, L, B, H, C, Fb_pascals, Fv_pascals, E_pascals, modulo_de_seccao, momento_de_inercia)
+    leff_req_solo = calcular_metodo_capacidade_solo(p_newtons, w_newtons, qa_pascals, B, H, Fb_pascals, Fv_pascals,
+                                                    modulo_de_seccao)
+    leff_req_mats = calcular_metodo_resistencia_base(p_newtons, w_newtons, qa_pascals, B, C, H, Fb_pascals, Fv_pascals,
+                                                     modulo_de_seccao)
+    leff_max_sistema = calcular_metodo_leff_efetivo(qa_pascals, w_newtons, L, B, H, C, Fb_pascals, Fv_pascals,
+                                                    E_pascals, modulo_de_seccao, momento_de_inercia)
+
+    # --- NOVA SEÇÃO: RESUMO FINAL DE SEGURANÇA ---
+    print("\n--- RESUMO FINAL DA ANÁLISE DE SEGURANÇA ---")
+    # O comprimento requerido pela carga é o MAIOR entre o que o solo pede e o que o mats pede.
+    leff_requerido_pela_carga = max(leff_req_solo, leff_req_mats)
+
+    print(f"Para a carga aplicada de {F} t, o Leff REQUERIDO é de: {leff_requerido_pela_carga:.2f} m")
+    print(f"A CAPACIDADE máxima de Leff do seu sistema é de: {leff_max_sistema:.2f} m")
+
+    if leff_max_sistema > leff_requerido_pela_carga:
+        fator_de_seguranca = leff_max_sistema / leff_requerido_pela_carga
+        percentual_utilizado = (leff_requerido_pela_carga / leff_max_sistema) * 100
+        print(
+            f"Resultado: ✅ SEGURO. A capacidade do sistema ({leff_max_sistema:.2f}m) é maior que a demanda ({leff_requerido_pela_carga:.2f}m).")
+        print(f"Fator de Segurança Global: {fator_de_seguranca:.2f}")
+        print(f"Percentual de Utilização da Capacidade: {percentual_utilizado:.1f}%")
+    else:
+        print(
+            f"Resultado: ❌ NÃO SEGURO. A capacidade do sistema ({leff_max_sistema:.2f}m) é menor que a demanda ({leff_requerido_pela_carga:.2f}m).")
 
     print("-" * 70)
     print("Análise concluída.")

@@ -1,0 +1,166 @@
+{% extends "layouts/base-auth.html" %}
+{% load static %}
+
+{% block extrastyle %}
+<style>
+  /* Mantém fundo uniforme nas linhas da tabela */
+  .table-dark tbody tr {
+    background-color: #27272a !important;
+  }
+  .table-dark thead th {
+    background-color: #27272a !important;
+    border-bottom: 1px solid #444;
+  }
+  .table-dark td,
+  .table-dark th {
+    color: #ffffff !important;
+  }
+
+  /* Remove setas dos inputs number */
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type=number] {
+    -moz-appearance: textfield;
+  }
+
+  /* Inputs pequenos */
+  .form-control-sm {
+    padding: .25rem .5rem;
+    font-size: .875rem;
+    line-height: 1.5;
+  }
+
+  /* Clareia os valores dentro da caixinha */
+  input.form-control-sm {
+    font-weight: 600 !important;
+    font-size: 1rem !important;
+    color: rgba(255,255,255,0.85) !important;
+    letter-spacing: .5px;
+  }
+</style>
+{% endblock extrastyle %}
+
+{% block content %}
+<main class="main-content mt-5">
+  <section class="pt-5 pt-md-6">
+    <div class="container d-flex justify-content-center">
+      <div class="card bg-dark text-white p-4" style="max-width:600px; width:100%;">
+        <h4 class="mb-4 text-center">Data Review</h4>
+        <form method="POST" action="{% url 'calcular' %}">
+          {% csrf_token %}
+          <div class="table-responsive mb-4">
+            <table class="table table-dark mb-0">
+              <thead>
+                <tr>
+                  <th class="text-center">Símbolo</th>
+                  <th class="text-center">Descrição</th>
+                  <th class="text-center">Unidade</th>
+                  <th class="text-end">Valor</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="text-center">C</td>
+                  <td class="text-start">Largura da Sapata</td>
+                  <td class="text-center">m</td>
+                  <td class="text-end">
+                    <input type="number" step="any" name="c" value="{{ c }}"
+                           class="form-control form-control-sm text-end">
+                  </td>
+                </tr>
+                <tr>
+                  <td class="text-center">F</td>
+                  <td class="text-start">Carga Aplicada</td>
+                  <td class="text-center">t</td>
+                  <td class="text-end">
+                    <input type="number" step="any" name="p_tf" value="{{ p_tf }}"
+                           class="form-control form-control-sm text-end">
+                  </td>
+                </tr>
+                <tr>
+                  <td class="text-center">S</td>
+                  <td class="text-start">Tensão Admissível do Solo</td>
+                  <td class="text-center">kgf/cm²</td>
+                  <td class="text-end">
+                    <input type="number" step="any" name="qa" value="{{ qa }}"
+                           class="form-control form-control-sm text-end">
+                  </td>
+                </tr>
+                <tr>
+                  <td class="text-center">L</td>
+                  <td class="text-start">Comprimento</td>
+                  <td class="text-center">m</td>
+                  <td class="text-end">
+                    <input type="number" step="any" name="comprimento" value="{{ comprimento }}"
+                           class="form-control form-control-sm text-end">
+                  </td>
+                </tr>
+                <tr>
+                  <td class="text-center">B</td>
+                  <td class="text-start">Largura</td>
+                  <td class="text-center">m</td>
+                  <td class="text-end">
+                    <input type="number" step="any" name="largura" value="{{ largura }}"
+                           class="form-control form-control-sm text-end">
+                  </td>
+                </tr>
+                <tr>
+                  <td class="text-center">H</td>
+                  <td class="text-start">Altura do mats</td>
+                  <td class="text-center">m</td>
+                  <td class="text-end">
+                    <input type="number" step="any" name="altura" value="{{ altura }}"
+                           class="form-control form-control-sm text-end">
+                  </td>
+                </tr>
+                <tr>
+                  <td class="text-center">ρ</td>
+                  <td class="text-start">Densidade</td>
+                  <td class="text-center">kg/m³</td>
+                  <td class="text-end">
+                    <input type="number" step="any" name="densidade" value="{{ densidade }}"
+                           class="form-control form-control-sm text-end">
+                  </td>
+                </tr>
+                <tr>
+                  <td class="text-center">Fb</td>
+                  <td class="text-start">Tensão Flexão</td>
+                  <td class="text-center">MPa</td>
+                  <td class="text-end">
+                    <input type="number" step="any" name="fb" value="{{ fb }}"
+                           class="form-control form-control-sm text-end">
+                  </td>
+                </tr>
+                <tr>
+                  <td class="text-center">Fv</td>
+                  <td class="text-start">Tensão Cisalhamento</td>
+                  <td class="text-center">MPa</td>
+                  <td class="text-end">
+                    <input type="number" step="any" name="fv" value="{{ fv }}"
+                           class="form-control form-control-sm text-end">
+                  </td>
+                </tr>
+                <tr>
+                  <td class="text-center">E</td>
+                  <td class="text-start">Módulo de Elasticidade</td>
+                  <td class="text-center">GPa</td>
+                  <td class="text-end">
+                    <input type="number" step="any" name="e" value="{{ e }}"
+                           class="form-control form-control-sm text-end">
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="text-center">
+            <button type="submit" class="btn bg-gradient-info w-100">Calcular</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+</main>
+{% endblock content %}

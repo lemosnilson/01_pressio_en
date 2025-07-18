@@ -4,18 +4,19 @@
 
 <head>
   {% include "includes/head.html" %}
+  <link rel="stylesheet" href="{% static 'assets/css/custom.css' %}">
   {% block extrastyle %}{% endblock extrastyle %}
 </head>
 
-<body class="dark-version">
+<body class="dark-version dark-page">
   <div class="container position-sticky z-index-sticky top-0">
     <div class="row">
       <div class="col-12">
         <!-- Navbar -->
-        <nav class="navbar navbar-expand-lg blur blur-rounded top-0 z-index-3 shadow position-absolute my-3 py-2 start-0 end-0 mx-4">
+        <nav class="navbar navbar-expand-md blur blur-rounded top-0 z-index-3 shadow position-absolute my-3 py-2 start-0 end-0 mx-4">
           <div class="container-fluid pe-0">
-            <a class="navbar-brand font-weight-bolder ms-lg-0 ms-3" href="{% url 'index' %}">
-              HOME
+            <a class="navbar-brand font-weight-bolder ms-md-0 ms-3" style="font-size: 1.2rem; color:#0ca9e4 !important;">
+              GBP Calculator
             </a>
             <button class="navbar-toggler shadow-none ms-2" type="button" data-bs-toggle="collapse" data-bs-target="#navigation"
               aria-controls="navigation" aria-expanded="false" aria-label="Toggle navigation">
@@ -26,23 +27,21 @@
               </span>
             </button>
             <div class="collapse navbar-collapse" id="navigation">
-              <ul class="navbar-nav mx-auto ms-xl-auto me-xl-7">
-                <li class="nav-item"></li>
-                <li class="nav-item"></li>
+              <ul class="navbar-nav position-absolute start-50 translate-middle-x">
                 <li class="nav-item">
-                  <a class="nav-link me-2" href="{% url 'register' %}">Contato</a>
+                  <a class="nav-link px-2" href="{% url 'contact' %}">CONTACT US</a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link me-2" href="{% url 'login' %}">Links</a>
+                  <a class="nav-link px-2" href="{% url 'under_construction' %}">LINKS</a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link me-2" href="{% url 'login' %}">Sobre Nós</a>
+                  <a class="nav-link px-2" href="{% url 'under_construction' %}">ABOUT US</a>
                 </li>
               </ul>
-              <ul class="navbar-nav d-lg-block d-none">
+              <ul class="navbar-nav d-md-block d-none ms-auto">
                 <li class="nav-item">
-                  <a href="https://app-generator.dev/product/soft-ui-dashboard/django/"
-                     class="btn btn-sm btn-round mb-0 me-1 bg-gradient-dark">Download</a>
+                  <a href="{% url 'under_construction' %}"
+                     class="btn btn-sm btn-round mb-0 me-1 bg-gradient-dark">Downloads</a>
                 </li>
               </ul>
             </div>
@@ -70,7 +69,7 @@
       <div class="row">
         <div class="col-8 mx-auto text-center mt-1">
           <p class="mb-0 text-secondary">
-            &copy; PRESSIO coded by "Borealis" IO-EVO.
+            &copy; 2025 BOREALIS IO-EVO. All rights reserved.
           </p>
         </div>
       </div>
@@ -78,18 +77,6 @@
   </footer>
 
   {% include "includes/scripts.html" %}
-
-  <!-- força o tema escuro assim que o DOM estiver pronto -->
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      if (typeof darkMode === 'function') {
-        darkMode({
-          getAttribute: () => null,  // faz darkMode entender que ainda não está “checked”
-          setAttribute: () => {}     // evita erro quando tenta setAttribute
-        });
-      }
-    });
-  </script>
 
   {% block extra_js %}{% endblock extra_js %}
 </body>

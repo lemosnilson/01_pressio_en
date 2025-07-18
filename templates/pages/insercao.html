@@ -1,0 +1,179 @@
+{# templates/pages/insercao.html #}
+{% extends "layouts/base-auth.html" %}
+{% load static %}
+
+{% block extrastyle %}
+<style>
+  /* Estrutura para o 'Sticky Footer' */
+  body.dark-version.dark-page {
+    background-color: #131516 !important;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  .main-content {
+      flex: 1; /* Força o conteúdo principal a 'crescer' */
+  }
+
+  /* Container principal da página */
+  .full-vh {
+    display: flex;
+    justify-content: center;
+    padding-top: 5rem; /* Ancoragem no topo */
+  }
+  .main-container {
+    display: flex;
+    gap: 2rem;
+    width: 100%;
+    max-width: 1200px;
+    padding: 2rem;
+  }
+  .form-column, .image-column {
+    flex: 1 1 50%; /* Garante colunas de larguras iguais */
+    display: flex;
+  }
+  .insercao-card {
+    background-color: #212325;
+    color: #ffffff;
+    border: none;
+    border-radius: .75rem;
+    padding: 2rem;
+    width: 100%;
+    height: 100%; 
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center; 
+  }
+  .card-content-wrapper {
+      width: 100%;
+  }
+
+  /* Estilos do Formulário */
+  .form-group {
+    margin-bottom: 1rem;
+    text-align: left;
+  }
+  .form-control {
+      background-color: #343a40;
+      border: 1px solid #495057;
+      color: #fff;
+  }
+  .form-control:focus {
+      background-color: #343a40;
+      border-color: #80bdff;
+      color: #fff;
+  }
+  label {
+    font-size: 1.1rem; 
+    font-weight: 300; /* Ou 'normal'. Este é o peso padrão, não-negrito. */
+  }
+  input[type=number]::-webkit-inner-spin-button, 
+  input[type=number]::-webkit-outer-spin-button { 
+    -webkit-appearance: none; 
+    margin: 0; 
+  }
+  input[type=number] {
+    -moz-appearance: textfield;
+  }
+
+  /* Estilo para o símbolo técnico (σadm) */
+  .simbolo {
+    font-size: 1.3em;
+    font-weight: bold;
+    margin-right: 8px;
+  }
+  /* Alinhamento da label específica do solo */
+  label[for="qa"] {
+    display: flex;
+    align-items: center;
+  }
+
+  /* Media Query para responsividade */
+  @media (max-width: 768px) {
+    .main-container {
+      flex-direction: column;
+      align-items: center;
+    }
+    .form-column, .image-column {
+        max-width: 500px;
+        width: 100%;
+    }
+  }
+
+  </style>
+{% endblock extrastyle %}
+
+{% block content %}
+<main class="main-content">
+  <div class="full-vh">
+    <div class="main-container">
+
+      <div class="form-column">
+        <div class="insercao-card">
+          <div class="card-content-wrapper">
+            <h4 class="text-center mb-4">Crane and Ground Data</h4>
+            <form action="{% url 'insercao' %}" method="POST">
+              {% csrf_token %}
+
+              <div class="form-group">
+                <label for="c">C - Outrigger Pad Width [ft]</label>
+                <input
+                  type="number"
+                  step="any"
+                  class="form-control"
+                  id="c"
+                  name="c"
+                  required
+                  title="Please enter the outrigger pad width in feet."
+                >
+              </div>
+              <div class="form-group">
+                <label for="p_tf">F -  Applied Load [lb]</label>
+                <input
+                  type="number"
+                  step="any"
+                  class="form-control"
+                  id="p_tf"
+                  name="p_tf"
+                  required
+                  title="Please enter the applied load in pounds (lb)."
+                >
+              </div>
+              <div class="form-group">
+                <label for="qa">S - Allowable Bearing Capacity [psf]</label>
+                <input
+                  type="number"
+                  step="any"
+                  class="form-control"
+                  id="qa"
+                  name="qa"
+                  required
+                  title="Please enter the allowable bearing capacity in psf."
+                >
+              </div>
+
+              <div class="text-center mt-4">
+                <button type="submit" class="btn bg-gradient-info w-100 my-4 mb-2">next</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="image-column">
+        <div class="insercao-card">
+          <div class="card-content-wrapper text-center">
+            <img
+              src="{% static 'assets/img/patola.png' %}"
+              alt="Diagrama da Base de Grua"
+              style="max-width: 100%; height: auto; border-radius: .5rem;"
+            >
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+{% endblock content %}
