@@ -220,4 +220,4 @@ EMAIL_HOST_USER         = 'borealisbridge@gmail.com'
 EMAIL_HOST_PASSWORD     = 'rqzzhlwexwbijfop'
 
 DEFAULT_FROM_EMAIL      = EMAIL_HOST_USER
-CONTACT_RECIPIENT_EMAIL = 'nilson.lemos@proton.me'
+CONTACT_RECIPIENT_EMAIL = 'ale.trein@gmail.com'
